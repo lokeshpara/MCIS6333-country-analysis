@@ -1,6 +1,12 @@
 # Country Analysis Dashboard
 
+![Deployment Status](https://github.com/lokeshpara/MCIS6333-country-analysis/actions/workflows/deploy.yml/badge.svg)
+
 A comprehensive data visualization web dashboard for analyzing country-level statistics. This Flask-based application provides various visualizations and insights on global demographic and economic data.
+
+## Live Demo
+
+The live application is deployed at: [https://mcis6333-country-analysis.onrender.com](https://mcis6333-country-analysis.onrender.com)
 
 ## Features
 
@@ -39,6 +45,13 @@ A comprehensive data visualization web dashboard for analyzing country-level sta
    http://localhost:5000
    ```
 
+## Technologies Used
+
+- **Backend**: Flask, Python, Pandas, NumPy
+- **Visualization**: Matplotlib, Seaborn
+- **Frontend**: HTML, CSS, JavaScript, Bootstrap
+- **Deployment**: Render, GitHub Actions
+
 ## Data Source
 
 The application uses country demographic and economic data from the `data/country_data.csv` file. This dataset includes information on population, GDP, literacy rates, birth rates, and other key indicators for countries around the world.
@@ -49,11 +62,3 @@ The application uses country demographic and economic data from the `data/countr
 - `templates/`: HTML templates for the dashboard
 - `static/`: CSS, JavaScript, and visualization assets
 - `data/`: CSV data files
-
-## Technologies Used
-
-- Flask: Web framework
-- Pandas & NumPy: Data processing
-- Matplotlib & Seaborn: Data visualization
-- HTML, CSS, JavaScript: Frontend
-- Bootstrap: UI components
