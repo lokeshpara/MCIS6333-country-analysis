@@ -56,4 +56,4 @@ The application uses country demographic and economic data from the `data/countr
 - Pandas & NumPy: Data processing
 - Matplotlib & Seaborn: Data visualization
 - HTML, CSS, JavaScript: Frontend
-- Bootstrap: UI components 
+- Bootstrap: UI components
