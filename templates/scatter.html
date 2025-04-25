@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+
+{% block title %}Scatter Analysis{% endblock %}
+
+{% block styles %}
+<style>
+    .correlation {
+        font-size: 1.1rem;
+        font-weight: 600;
+        padding: 12px 18px;
+        border-radius: 10px;
+        display: inline-block;
+    }
+    .positive {
+        background-color: rgba(46, 204, 113, 0.15);
+        color: #27ae60;
+        border-left: 4px solid #27ae60;
+    }
+    .negative {
+        background-color: rgba(231, 76, 60, 0.15);
+        color: #c0392b;
+        border-left: 4px solid #c0392b;
+    }
+    .neutral {
+        background-color: rgba(149, 165, 166, 0.15);
+        color: #7f8c8d;
+        border-left: 4px solid #7f8c8d;
+    }
+    .correlation-matrix {
+        background-color: #fff;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    }
+    .matrix-cell {
+        text-align: center;
+        padding: 15px;
+        transition: all 0.3s;
+    }
+    .matrix-cell:hover {
+        transform: scale(1.05);
+        box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        z-index: 10;
+        position: relative;
+    }
+    .variable-selector {
+        background-color: var(--light-accent);
+        padding: 25px;
+        border-radius: 16px;
+        margin-bottom: 25px;
+        border: 1px solid rgba(0,0,0,0.05);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.03);
+    }
+    .loading-indicator {
+        text-align: center;
+        padding: 50px 0;
+        color: var(--muted);
+    }
+    .chart-container {
+        height: 600px; /* Increased height for scatter plots */
+        position: relative;
+        margin: auto;
+        width: 100%;
+        padding: 20px;
+    }
+    .custom-chart-container {
+        height: 650px; /* Even taller for the custom chart */
+    }
+    /* Animations for the loading state */
+    @keyframes pulse {
+        0% { opacity: 0.6; }
+        50% { opacity: 1; }
+        100% { opacity: 0.6; }
+    }
+    .loading-indicator .spinner-border {
+        animation: pulse 1.5s infinite ease-in-out, spinner-border 0.75s linear infinite;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row mb-4">
+        <div class="col-12 text-center">
+            <h1 class="display-5 fw-bold mb-3" style="background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                <i class="fas fa-chart-scatter me-2"></i>Data Relationships
+            </h1>
+            <p class="lead text-muted mb-5">Explore correlations and patterns between different country indicators</p>
+        </div>
+    </div>
+    
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-globe me-2"></i>Population & Area</h5>
+                </div>
+                <div class="card-body">
+                    <div id="population-area-container" class="chart-container">
+                        <div class="loading-indicator">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-3">Loading data...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-sliders-h me-2"></i>Custom Analysis</h5>
+                </div>
+                <div class="card-body">
+                    <div class="variable-selector">
+                        <div class="row g-3">
+                            <div class="col-md-5">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-primary text-light"><i class="fas fa-arrows-alt-h me-1"></i> X</span>
+                                    <select id="x-variable" class="form-select form-select-lg">
+                                        <!-- Options populated by JS -->
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-5">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-primary text-light"><i class="fas fa-arrows-alt-v me-1"></i> Y</span>
+                                    <select id="y-variable" class="form-select form-select-lg">
+                                        <!-- Options populated by JS -->
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <button id="update-scatter" class="btn btn-primary w-100 py-3">
+                                    <i class="fas fa-sync-alt me-1"></i> Update
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <div class="alert alert-info">
+                                <i class="fas fa-link me-2"></i>
+                                <strong>Correlation: </strong>
+                                <span id="correlation-value" class="fw-bold">-</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="custom-scatter-container" class="chart-container custom-chart-container">
+                        <div class="loading-indicator">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-3">Loading data...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-table me-2"></i>Key Correlations</h5>
+                </div>
+                <div class="card-body">
+                    <div id="correlation-matrix-container" class="correlation-matrix table-responsive">
+                        <div class="loading-indicator">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-3">Loading correlation data...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Override default Chart.js options to make charts taller
+    Chart.defaults.plugins.legend.position = 'bottom';
+    Chart.defaults.plugins.tooltip.padding = 12;
+    Chart.defaults.plugins.tooltip.bodyFont = {
+        size: 14
+    };
+    Chart.defaults.plugins.tooltip.titleFont = {
+        size: 16
+    };
+    Chart.defaults.font.family = "'Poppins', sans-serif";
+    Chart.defaults.responsive = true;
+    Chart.defaults.maintainAspectRatio = false;
+</script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+<script src="{{ url_for('static', filename='js/scatter.js') }}"></script>
+{% endblock %} 

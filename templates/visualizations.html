@@ -1,0 +1,199 @@
+{% extends "base.html" %}
+
+{% block title %}Static Visualizations{% endblock %}
+
+{% block styles %}
+<style>
+    .card {
+        margin-bottom: 20px;
+        transition: transform 0.3s;
+        height: 100%;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    }
+    
+    .card-img-top {
+        height: 200px;
+        object-fit: contain;
+        background-color: #f8f9fa;
+        cursor: pointer;
+    }
+    
+    .modal-img {
+        max-width: 100%;
+        max-height: 85vh;
+        height: auto;
+        width: auto;
+        object-fit: contain;
+    }
+    
+    /* Make modal larger */
+    .modal-content {
+        height: auto;
+        min-height: 300px;
+    }
+    
+    .modal-body {
+        padding: 1rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 300px;
+    }
+    
+    .viz-section {
+        margin-bottom: 40px;
+    }
+    
+    .viz-section h2 {
+        border-bottom: 2px solid #007bff;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+        color: #495057;
+    }
+    
+    .viz-description {
+        color: #6c757d;
+        font-size: 0.95rem;
+        height: auto;
+        overflow: auto;
+    }
+    
+    .close {
+        font-size: 1.5rem;
+        opacity: 0.8;
+    }
+    
+    .close:hover {
+        opacity: 1;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <h1 class="mb-4 text-center">Data Visualizations</h1>
+    
+    {% if error %}
+    <div class="alert alert-danger">
+        <strong>Error:</strong> {{ error }}
+    </div>
+    {% endif %}
+    
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="alert alert-info">
+                <p class="mb-0">These visualizations showcase different aspects of our global country dataset. Click on any image to view it in full size.</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Regional Analysis Section -->
+    <div class="viz-section">
+        <h2>Regional Analysis</h2>
+        <div class="row">
+            {% for image in regional_visualizations %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <img src="{{ image.image_path }}" class="card-img-top" alt="{{ image.title }}" data-bs-toggle="modal" data-bs-target="#imageModal" data-img="{{ image.image_path }}" data-title="{{ image.title }}">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ image.title }}</h5>
+                        <p class="viz-description">{{ image.description }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            
+            {% if not regional_visualizations %}
+            <div class="col-md-12">
+                <div class="alert alert-warning">No regional analysis visualizations available.</div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Distribution Analysis Section -->
+    <div class="viz-section">
+        <h2>Distribution Analysis</h2>
+        <div class="row">
+            {% for image in distribution_visualizations %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <img src="{{ image.image_path }}" class="card-img-top" alt="{{ image.title }}" data-bs-toggle="modal" data-bs-target="#imageModal" data-img="{{ image.image_path }}" data-title="{{ image.title }}">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ image.title }}</h5>
+                        <p class="viz-description">{{ image.description }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            
+            {% if not distribution_visualizations %}
+            <div class="col-md-12">
+                <div class="alert alert-warning">No distribution analysis visualizations available.</div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Correlation Analysis Section -->
+    <div class="viz-section">
+        <h2>Correlation Analysis</h2>
+        <div class="row">
+            {% for image in correlation_visualizations %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <img src="{{ image.image_path }}" class="card-img-top" alt="{{ image.title }}" data-bs-toggle="modal" data-bs-target="#imageModal" data-img="{{ image.image_path }}" data-title="{{ image.title }}">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ image.title }}</h5>
+                        <p class="viz-description">{{ image.description }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            
+            {% if not correlation_visualizations %}
+            <div class="col-md-12">
+                <div class="alert alert-warning">No correlation analysis visualizations available.</div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Modal for enlarged image view -->
+    <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="imageModalLabel">Visualization</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <img src="" class="modal-img" id="modalImage" alt="Visualization">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Set the modal image and title when triggered
+    var imageModal = document.getElementById('imageModal');
+    if (imageModal) {
+        imageModal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget;
+            var imgPath = button.getAttribute('data-img');
+            var imgTitle = button.getAttribute('data-title');
+            
+            this.querySelector('.modal-title').textContent = imgTitle;
+            this.querySelector('#modalImage').setAttribute('src', imgPath);
+        });
+    }
+</script>
+{% endblock %} 

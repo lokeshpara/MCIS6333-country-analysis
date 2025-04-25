@@ -1,0 +1,221 @@
+{% extends "base.html" %}
+
+{% block title %}Country Data Dashboard - Histograms{% endblock %}
+
+{% block styles %}
+<style>
+    .histogram-analysis {
+        background-color: #f8f9fa;
+        padding: 15px;
+        border-radius: 5px;
+        margin-top: 15px;
+    }
+    .highlight {
+        background-color: #ffc107;
+        font-weight: bold;
+        padding: 2px 5px;
+        border-radius: 3px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h2 class="card-title">Histogram Analysis</h2>
+            </div>
+            <div class="card-body">
+                <p class="lead">
+                    Explore the distribution of birthrates and literacy rates across countries using histograms.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Birthrate Histogram -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h3 class="card-title">Birthrate Histogram</h3>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="birthrate-histogram"></canvas>
+                </div>
+                
+                <div class="histogram-analysis">
+                    <h4>Analysis:</h4>
+                    <p>
+                        The tallest bar (most common range) contains <span class="highlight">{{ birth_tallest_count }} countries</span> 
+                        with birthrates between <span class="highlight">{{ birth_tallest_lower }}</span> and 
+                        <span class="highlight">{{ birth_tallest_upper }}</span> births per 1000 population.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Literacy Histogram -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h3 class="card-title">Literacy Rate Histogram</h3>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="literacy-histogram"></canvas>
+                </div>
+                
+                <div class="histogram-analysis">
+                    <h4>Analysis:</h4>
+                    <p>
+                        The tallest bar (most common range) contains <span class="highlight">{{ lit_tallest_count }} countries</span> 
+                        with literacy rates between <span class="highlight">{{ lit_tallest_lower }}%</span> and 
+                        <span class="highlight">{{ lit_tallest_upper }}%</span>.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Data for histograms
+    const birthrateCounts = {{ birth_counts|tojson }};
+    const birthrateLabels = {{ birth_labels|tojson }};
+    const birthrateTallestIndex = {{ birth_counts.index(birth_tallest_count) }};
+    
+    const literacyCounts = {{ lit_counts|tojson }};
+    const literacyLabels = {{ lit_labels|tojson }};
+    const literacyTallestIndex = {{ lit_counts.index(lit_tallest_count) }};
+    
+    // Create colors array with highlight for tallest bar
+    function createColorArray(length, tallestIdx) {
+        const colors = Array(length).fill('rgba(54, 162, 235, 0.7)');
+        colors[tallestIdx] = 'rgba(255, 159, 64, 0.9)';
+        return colors;
+    }
+    
+    // Birthrate histogram
+    const birthCtx = document.getElementById('birthrate-histogram').getContext('2d');
+    new Chart(birthCtx, {
+        type: 'bar',
+        data: {
+            labels: birthrateLabels,
+            datasets: [{
+                label: 'Number of Countries',
+                data: birthrateCounts,
+                backgroundColor: createColorArray(birthrateCounts.length, birthrateTallestIndex),
+                borderColor: createColorArray(birthrateCounts.length, birthrateTallestIndex).map(c => c.replace('0.7', '1').replace('0.9', '1')),
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Distribution of Birthrates Across Countries',
+                    font: {
+                        size: 16
+                    }
+                },
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        title: function(context) {
+                            return `Birthrate: ${context[0].label}`;
+                        },
+                        label: function(context) {
+                            return `${context.raw} countries`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Number of Countries'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Birthrate (per 1000 population)'
+                    }
+                }
+            }
+        }
+    });
+    
+    // Literacy histogram
+    const litCtx = document.getElementById('literacy-histogram').getContext('2d');
+    new Chart(litCtx, {
+        type: 'bar',
+        data: {
+            labels: literacyLabels,
+            datasets: [{
+                label: 'Number of Countries',
+                data: literacyCounts,
+                backgroundColor: createColorArray(literacyCounts.length, literacyTallestIndex),
+                borderColor: createColorArray(literacyCounts.length, literacyTallestIndex).map(c => c.replace('0.7', '1').replace('0.9', '1')),
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Distribution of Literacy Rates Across Countries',
+                    font: {
+                        size: 16
+                    }
+                },
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        title: function(context) {
+                            return `Literacy Rate: ${context[0].label}`;
+                        },
+                        label: function(context) {
+                            return `${context.raw} countries`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Number of Countries'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Literacy Rate (%)'
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %} 
