@@ -4,6 +4,7 @@ This document provides instructions for deploying the Country Analysis Dashboard
 
 ## Table of Contents
 - [Local Deployment](#local-deployment)
+- [Render](#render)
 - [Google Cloud App Engine](#google-cloud-app-engine)
 - [Heroku](#heroku)
 - [Railway](#railway)
@@ -33,6 +34,32 @@ This document provides instructions for deploying the Country Analysis Dashboard
    ```
 
 5. Open your browser and go to `http://localhost:5000`
+
+## Render
+
+1. Create a Render account at [render.com](https://render.com)
+
+2. Create a new Web Service and select your GitHub repository
+
+3. Configure with the following settings:
+   - Build Command: `pip install --upgrade pip && pip install wheel && pip install --only-binary=:all: -r requirements.txt`
+   - Start Command: `gunicorn app:app`
+   - Select Python 3.9 as the runtime environment
+
+4. Alternatively, the repository includes a `render.yaml` file for Blueprint deployment:
+   ```
+   # From the render dashboard, select "New" > "Blueprint"
+   # Then connect to your GitHub repository
+   ```
+
+5. Add GitHub Actions Integration (Optional):
+   - Get your Render API Key from Account Settings
+   - Get your Service ID from the URL of your service
+   - Add these as GitHub secrets:
+     - RENDER_API_KEY
+     - RENDER_SERVICE_ID
+
+6. Open your browser and go to the URL provided by Render
 
 ## Google Cloud App Engine
 

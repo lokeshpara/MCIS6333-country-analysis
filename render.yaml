@@ -2,7 +2,7 @@ services:
   - type: web
     name: mcis6333-country-analysis
     runtime: python
-    buildCommand: pip install --upgrade pip && pip install -r requirements.txt
+    buildCommand: pip install --upgrade pip && pip install wheel && pip install --only-binary=:all: -r requirements.txt
     startCommand: gunicorn app:app
     envVars:
       - key: PYTHON_VERSION
